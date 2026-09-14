@@ -1,0 +1,489 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f3C3c5;
+    color: #C65C69;
+    line-height: 1.5;
+}
+
+.header {
+    background-color: #C65C69;
+    color: #fADAD9;
+    padding: 30px 7%;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.header h1 {
+    font-size: 30px;
+    margin-bottom: 5px;
+}
+
+.header p {
+    color: #E0959C;
+    font-size: 14px;
+}
+
+.container {
+    width: 86%;
+    max-width: 1200px;
+
+    margin: 35px auto;
+
+    display: flex;
+    flex-direction: row;
+
+    gap: 25px;
+
+    align-items: flex-start;
+}
+
+.todo-panel {
+    width: 60%;
+
+    background-color: #fADAD9;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.panel-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    font-size: 23px;
+}
+
+.panel-header p {
+    color: #E0959C;
+    font-size: 14px;
+}
+
+.todo-count {
+    width: 35px;
+    height: 35px;
+
+    background-color: #C65C69;
+    color: #fADAD9;
+
+    border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-weight: bold;
+}
+
+.todo-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.todo-item {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 17px;
+
+    border: 1px solid #f3C3c5;
+
+    border-radius: 9px;
+
+    background-color: #fADAD9;
+}
+
+.todo-item.active {
+    border-left: 4px solid #C65C69;
+
+    background-color: #f3C3c5;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+
+    border: 2px solid #CE6F79;
+
+    border-radius: 5px;
+
+    flex-shrink: 0;
+}
+
+
+.todo-content {
+    flex: 1;
+}
+
+.todo-content h3 {
+    font-size: 15px;
+
+    margin-bottom: 4px;
+}
+
+.todo-content p {
+    color: #E0959C;
+
+    font-size: 13px;
+
+    margin-bottom: 8px;
+}
+
+.tag {
+    display: inline-block;
+
+    background-color: #E9ABAE;
+
+    color: #D78289;
+
+    padding: 4px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+}
+
+.priority {
+    font-size: 11px;
+
+    padding: 4px 8px;
+
+    border-radius: 15px;
+
+    font-weight: bold;
+}
+
+.priority.high {
+    background-color: #ffe1e1;
+
+    color: #c33;
+}
+
+.priority.medium {
+    background-color: #fff0c9;
+
+    color: #a36b00;
+}
+
+.priority.low {
+    background-color: #ddf5e5;
+
+    color: #287443;
+}
+
+.detail-panel {
+    width: 40%;
+
+    background-color: #C65C69;
+
+    color: #fADAD9;
+
+    padding: 28px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.label {
+    display: inline-block;
+
+    font-size: 11px;
+
+    letter-spacing: 1.5px;
+
+    color: #f3C3c5;
+
+    font-weight: bold;
+}
+
+.detail-header h2 {
+    font-size: 23px;
+
+    margin: 10px 0;
+}
+
+.detail-header p {
+    color: #f3C3c5;
+
+    font-size: 14px;
+}
+
+.detail-info {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+
+    margin: 28px 0;
+}
+
+.info-item {
+    border-top: 1px solid #CE6F79;
+
+    padding-top: 12px;
+}
+
+.info-label {
+    display: block;
+
+    color: #F3C3c5;
+
+    font-size: 12px;
+
+    margin-bottom: 4px;
+}
+
+.info-item strong {
+    font-size: 14px;
+}
+
+.text-high {
+    color: #4A202A;
+}
+
+.description {
+    border-top: 1px solid #CE6F79;
+
+    padding-top: 20px;
+}
+
+.description h3 {
+    font-size: 15px;
+
+    margin-bottom: 8px;
+}
+
+.description p {
+    color: #F3C3c5;
+
+    font-size: 13px;
+}
+
+.actions {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.btn {
+    flex: 1;
+
+    padding: 11px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+.complete-btn {
+    border: none;
+
+    background-color: #fADAD9;
+
+    color: #C65C69;
+}
+
+.delete-btn {
+    background-color: transparent;
+
+    color: #4A202A;
+
+    border: 1px solid #4A202A;
+}
+
+
+.new-todo-section {
+    width: 86%;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+}
+
+.todo-form {
+    background-color: #fADAD9;
+
+    padding: 28px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+
+.form-heading {
+    margin-bottom: 20px;
+}
+
+.form-heading h2 {
+    margin-top: 5px;
+
+    font-size: 22px;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+
+    padding: 11px;
+
+    border: 1px solid #dddddd;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    background-color: #fADAD9;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-row {
+    display: flex;
+
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.add-btn {
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background-color: #c65c69;
+
+    color: #fADAD9;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.footer {
+    text-align: center;
+
+    padding: 25px;
+
+    color: #c65c69;
+
+    font-size: 13px;
+}
+
+
+@media (max-width: 850px) {
+
+    .container {
+        flex-direction: column;
+    }
+
+    .todo-panel,
+    .detail-panel {
+        width: 100%;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .header {
+        padding: 25px 5%;
+    }
+
+    .header h1 {
+        font-size: 25px;
+    }
+
+    .container {
+        width: 90%;
+
+        margin: 25px auto;
+    }
+
+    .todo-panel,
+    .detail-panel {
+        padding: 20px;
+    }
+
+    .todo-item {
+        flex-wrap: wrap;
+    }
+
+    .priority {
+        margin-left: 32px;
+    }
+
+    .detail-info {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .form-row {
+        flex-direction: column;
+
+        gap: 0;
+    }
+
+    .new-todo-section {
+        width: 90%;
+    }
+
+    .todo-form {
+        padding: 20px;
+    }
+
+}
+
