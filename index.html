@@ -4,138 +4,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>My To do List</title>
-
+    <title>My To Do List</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
     <header class="header">
         <div class="header-content">
-            <h1>My To do List</h1>
-            <p>Stay organized and complete your tasks.</p>
+            <div>
+                <h1>My To Do List</h1>
+                <p>Stay organized and complete your tasks.</p>
+            </div>
+            <button id="theme-btn" class="theme-btn">
+                🌙 Dark Mode
+            </button>
         </div>
     </header>
 
     <main class="container">
-
         <section class="todo-panel">
-
             <div class="panel-header">
                 <div>
                     <h2>My Todos</h2>
-                    <p>3 tasks remaining</p>
+                    <p id="task-info">3 tasks remaining</p>
                 </div>
-
-                <span class="todo-count">3</span>
+                <span id="todo-count" class="todo-count">
+                    3
+                </span>
             </div>
-
-            <div class="todo-list">
-
-                <article class="todo-item active">
-
-                    <div class="checkbox"></div>
-
-                    <div class="todo-content">
-                        <h3>Tugas Pemrograman Web</h3>
-
-                        <p>
-                            Deadline: 14 September 2026
-                        </p>
-
-                        <span class="tag">Kuliah</span>
-                    </div>
-
-                    <span class="priority high">
-                        High
-                    </span>
-
-                </article>
-
-                <article class="todo-item">
-
-                    <div class="checkbox"></div>
-
-                    <div class="todo-content">
-                        <h3>
-                            Tugas Konsep Kecerdasan Artificial
-                        </h3>
-
-                        <p>
-                            Deadline: 15 September 2026
-                        </p>
-
-                        <span class="tag">Kuliah</span>
-                    </div>
-
-                    <span class="priority high">
-                        High
-                    </span>
-
-                </article>
-
-                <article class="todo-item">
-
-                    <div class="checkbox"></div>
-
-                    <div class="todo-content">
-                        <h3>Tugas Matematika Diskrit</h3>
-
-                        <p>
-                            Deadline: 16 September 2026
-                        </p>
-
-                        <span class="tag">Kuliah</span>
-                    </div>
-
-                    <span class="priority high">
-                        High
-                    </span>
-
-                </article>
-
-            </div>
-
+            <div id="todo-list" class="todo-list"></div>
         </section>
 
         <aside class="detail-panel">
-
             <div class="detail-header">
-
                 <span class="label">
                     TO DO DETAILS
                 </span>
-
-                <h2>
+                <h2 id="detail-title">
                     Tugas Pemrograman Web
                 </h2>
-
-                <p>
-                    Deadline: 14 September 2026
+                <p id="detail-date">
+                    Deadline: 21 September 2026
                 </p>
-
             </div>
 
-            <div class="detail-info">
 
+            <div class="detail-info">
                 <div class="info-item">
                     <span class="info-label">
                         Status
                     </span>
-
-                    <strong>
+                    <strong id="detail-status">
                         Not Started
                     </strong>
                 </div>
+
 
                 <div class="info-item">
                     <span class="info-label">
                         Priority
                     </span>
-
-                    <strong class="text-high">
+                    <strong id="detail-priority">
                         High
                     </strong>
                 </div>
@@ -145,9 +74,8 @@
                     <span class="info-label">
                         Due Date
                     </span>
-
-                    <strong>
-                        14 September 2026
+                    <strong id="detail-due">
+                        21 September 2026
                     </strong>
                 </div>
 
@@ -156,96 +84,78 @@
                     <span class="info-label">
                         Category
                     </span>
-
                     <strong>
                         Kuliah
                     </strong>
                 </div>
-
             </div>
-
             <div class="description">
-
                 <h3>
                     Description
                 </h3>
-
-                <p>
-                    Tugas E01a & E01b deadline jam 20.00 WIB.
+                <p id="detail-description">
+                    Tugas E02a & E02b deadline jam 20.00 WIB.
                 </p>
-
             </div>
+
 
             <div class="actions">
-
-                <button class="btn complete-btn">
+                <button
+                    id="complete-btn"
+                    class="btn complete-btn">
                     Mark as Complete
                 </button>
-
-                <button class="btn delete-btn">
+                <button
+                    id="delete-btn"
+                    class="btn delete-btn">
                     Delete Todo
                 </button>
-
             </div>
-
         </aside>
-
     </main>
 
     <section class="new-todo-section">
-
-        <form class="todo-form">
-
+        <form id="todo-form" class="todo-form">
             <div class="form-heading">
-
                 <span class="label">
                     NEW TASK
                 </span>
-
                 <h2>
-                    Create a New To do
+                    Create a New To Do
                 </h2>
-
             </div>
 
+
             <div class="form-group">
-
                 <label for="title">
-                    To do Title
+                    To Do Title
                 </label>
-
                 <input
                     type="text"
                     id="title"
                     name="title"
                     placeholder="Enter your task..."
+                    required
                 >
-
             </div>
 
-            <div class="form-group">
 
+            <div class="form-group">
                 <label for="description">
                     Description
                 </label>
-
                 <textarea
                     id="description"
                     name="description"
                     rows="4"
                     placeholder="Describe your task..."
                 ></textarea>
-
             </div>
-
             <div class="form-row">
-
                 <div class="form-group">
-
                     <label for="priority">
                         Priority
                     </label>
-
                     <select
                         id="priority"
                         name="priority"
@@ -253,35 +163,28 @@
                         <option value="high">
                             High
                         </option>
-
                         <option value="medium">
                             Medium
                         </option>
-
                         <option value="low">
                             Low
                         </option>
-
                     </select>
-
                 </div>
 
 
                 <div class="form-group">
-
                     <label for="date">
                         Due Date
                     </label>
-
                     <input
                         type="date"
                         id="date"
                         name="date"
                     >
-
                 </div>
-
             </div>
+
 
             <button
                 type="submit"
@@ -289,20 +192,16 @@
             >
                 + Add Todo
             </button>
-
         </form>
-
     </section>
 
+
     <footer class="footer">
-
         <p>
-            © 2026 My To do List
+            © 2026 My To Do List
         </p>
-
     </footer>
-
+    
+    <script src="script.js"></script>
 </body>
-
 </html>
-
