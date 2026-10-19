@@ -1,4 +1,4 @@
-# E03a - The Style Warrior
+# E04a - The Iron Citadel
 
 ## Identitas
 
@@ -10,8 +10,9 @@
 ## Tampilan Website
 
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5db8e816-a82c-4eb5-b58b-e439bf15f331" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/16345f6c-acbc-46d1-a240-6d1d4687f4ef" />
+<img width="1896" height="912" alt="image" src="https://github.com/user-attachments/assets/dd7811b9-9651-4e08-9559-7b8d868ca6f5" />
+<img width="1911" height="908" alt="image" src="https://github.com/user-attachments/assets/e492606d-89f1-420f-9053-b4514c4d2a28" />
+
 
 
 ---
