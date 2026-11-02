@@ -1104,20 +1104,49 @@ todoList.addEventListener(
 
 function loadTheme() {
 
-    const savedTheme =
-        localStorage.getItem(
-            "todo-theme"
-        );
+const savedTheme =
+    localStorage.getItem("todo-theme");
 
+if (savedTheme === "dark") {
 
-    if (savedTheme === "dark") {
+    document.body.classList.add("dark-mode");
 
-        document.body.classList.add(
-            "dark-mode"
-        );
+    themeBtn.textContent = "☀️ Light Mode";
 
-        themeBtn.textContent =
-            "☀️ Light Mode";
+    themeBtn.setAttribute(
+        "aria-label",
+        "Switch to light mode"
+    );
+
+} else {
+
+    document.body.classList.remove("dark-mode");
+
+    themeBtn.textContent = "🌙 Dark Mode";
+
+    themeBtn.setAttribute(
+        "aria-label",
+        "Switch to dark mode"
+    );
+
+}
+
+}
+
+themeBtn.addEventListener(
+"click",
+function() {
+
+    document.body.classList.toggle("dark-mode");
+
+    const darkMode =
+        document.body.classList.contains("dark-mode");
+
+    if (darkMode) {
+
+        localStorage.setItem("todo-theme", "dark");
+
+        themeBtn.textContent = "☀️ Light Mode";
 
         themeBtn.setAttribute(
             "aria-label",
@@ -1126,12 +1155,9 @@ function loadTheme() {
 
     } else {
 
-        document.body.classList.remove(
-            "dark-mode"
-        );
+        localStorage.setItem("todo-theme", "light");
 
-        themeBtn.textContent =
-            "🌙 Dark Mode";
+        themeBtn.textContent = "🌙 Dark Mode";
 
         themeBtn.setAttribute(
             "aria-label",
@@ -1142,59 +1168,6 @@ function loadTheme() {
 
 }
 
-
-themeBtn.addEventListener(
-    "click",
-    function() {
-
-        document.body.classList.toggle(
-            "dark-mode"
-        );
-
-
-        const darkMode =
-            document.body.classList.contains(
-                "dark-mode"
-            );
-
-
-        if (darkMode) {
-
-            localStorage.setItem(
-                "todo-theme",
-                "dark"
-            );
-
-
-            themeBtn.textContent =
-                "☀️ Light Mode";
-
-
-            themeBtn.setAttribute(
-                "aria-label",
-                "Switch to light mode"
-            );
-
-        } else {
-
-            localStorage.setItem(
-                "todo-theme",
-                "light"
-            );
-
-
-            themeBtn.textContent =
-                "🌙 Dark Mode";
-
-
-            themeBtn.setAttribute(
-                "aria-label",
-                "Switch to dark mode"
-            );
-
-        }
-
-    }
 );
 
 
@@ -1562,4 +1535,36 @@ if (
 }
 loadTheme();
 initializeDatabase();
+
+let deferredInstallPrompt = null;
+
+const installButton = document.getElementById("install-btn");
+
+window.addEventListener("beforeinstallprompt", function(event) {
+    event.preventDefault();
+
+    deferredInstallPrompt = event;
+
+    if (installButton) {
+        installButton.hidden = false;
+    }
+});
+
+if (installButton) {
+    installButton.addEventListener("click", async function() {
+        if (!deferredInstallPrompt) {
+            return;
+        }
+
+        deferredInstallPrompt.prompt();
+
+        const result = await deferredInstallPrompt.userChoice;
+
+        if (result.outcome === "accepted") {
+            installButton.hidden = true;
+        }
+
+        deferredInstallPrompt = null;
+    });
+}
 

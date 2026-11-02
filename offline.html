@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Todo App</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f5ed;
+            color: #354b35;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .offline-container {
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        p {
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #789875;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <h1>You are Offline</h1>
+        <p>Oops! You are currently disconnected from the internet.</p>
+        <p>Please reconnect to continue using your Todo App.</p>
+
+        <button onclick="window.location.reload()">
+            Try Again
+        </button>
+    </div>
+</body>
+</html>
