@@ -1,0 +1,5 @@
+
+# Local backup files
+index_*_backup.*
+script_*_backup.*
+style_*_backup.*
