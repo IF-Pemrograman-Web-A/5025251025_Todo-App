@@ -1,38 +1,355 @@
+
 <?php
 require 'config.php';
-$scope=($_GET['scope'] ?? 'personal')==='shared'?'shared':'personal';
-$pageTitle=ucfirst($scope).' Todos | My To Do List';
-$selectedId=(int)($_GET['selected'] ?? 0);
-if($scope==='shared') $stmt=$pdo->query("SELECT * FROM todos WHERE scope='shared' ORDER BY completed, created_at DESC");
-else { $stmt=$pdo->prepare("SELECT * FROM todos WHERE scope='personal' AND owner_id=? ORDER BY completed, created_at DESC"); $stmt->execute([demo_user_id()]); }
-$todos=$stmt->fetchAll();
-$selected=null; foreach($todos as $t) if((int)$t['id']===$selectedId) $selected=$t;
-if(!$selected && $todos) $selected=$todos[0];
+
+$scope = ($_GET['scope'] ?? 'personal') === 'shared' ? 'shared' : 'personal';
+$pageTitle = ucfirst($scope) . ' Todos | My To Do List';
+$selectedId = (int)($_GET['selected'] ?? 0);
+
 require 'header.php';
 ?>
+
 <main id="main-content" class="workspace">
-<?php require 'menubar.php'; ?>
-<section class="todo-panel" aria-labelledby="list-title">
-<div class="panel-header"><div><span class="eyebrow"><?= $scope==='shared'?'TEAM WORKSPACE':'YOUR WORKSPACE' ?></span><h2 id="list-title"><?=ucfirst($scope)?> Todos</h2><p><?=count(array_filter($todos,fn($t)=>!$t['completed']))?> tasks remaining</p></div><span class="todo-count"><?=count(array_filter($todos,fn($t)=>!$t['completed']))?></span></div>
-<?php if(!$todos): ?><div class="empty-state">No todos here yet 🌱<br>Add a task using the form.</div><?php else: ?><div class="todo-list">
-<?php foreach($todos as $t): ?><article class="todo-item <?=$selected && $selected['id']===$t['id']?'active':''?> <?=$t['completed']?'completed':''?>">
-<form method="post" action="actions.php" class="inline-form"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?=$t['id']?>"><input type="hidden" name="scope" value="<?=e($scope)?>"><button class="checkbox-button <?=$t['completed']?'checked':''?>" aria-label="Toggle <?=e($t['title'])?>"><?=$t['completed']?'✓':''?></button></form>
-<a class="todo-content" href="index.php?scope=<?=e($scope)?>&selected=<?=$t['id']?>"><h3><?=e($t['title'])?></h3><p>Deadline: <?=$t['due_date']?e(date('d F Y',strtotime($t['due_date']))):'No deadline'?></p><span class="tag"><?=e($t['category'])?></span></a><span class="priority <?=e($t['priority'])?>"><?=e(ucfirst($t['priority']))?></span></article><?php endforeach; ?></div><?php endif; ?>
-</section>
-<aside class="detail-panel">
-<?php if($selected): ?><span class="detail-label">TO DO DETAILS</span><h2><?=e($selected['title'])?></h2><p class="detail-date">Deadline: <?=$selected['due_date']?e(date('d F Y',strtotime($selected['due_date']))):'No deadline'?></p>
-<div class="detail-info"><div class="info-item"><span>Status</span><strong><?=$selected['completed']?'Completed':'Not Started'?></strong></div><div class="info-item"><span>Priority</span><strong><?=e(ucfirst($selected['priority']))?></strong></div><div class="info-item"><span>Category</span><strong><?=e($selected['category'])?></strong></div><div class="info-item"><span>Visibility</span><strong><?=e(ucfirst($selected['scope']))?></strong></div></div>
-<div class="description"><h3>Description</h3><p><?=nl2br(e($selected['description'])) ?: 'No description.'?></p></div>
-<?php if($selected['image_path']): ?><div class="description"><h3>Attachment</h3><img class="detail-image" src="<?=e($selected['image_path'])?>" alt="Image attached to todo"></div><?php endif; ?>
-<?php if($selected['notification_time']): ?><div class="description"><h3>Reminder time</h3><p><?=e(date('d M Y, H:i',strtotime($selected['notification_time'])))?></p></div><?php endif; ?>
-<div class="actions"><form method="post" action="actions.php"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?=$selected['id']?>"><input type="hidden" name="scope" value="<?=e($scope)?>"><button class="btn complete-btn"><?=$selected['completed']?'Mark Incomplete':'Mark Complete'?></button></form>
-<form method="post" action="actions.php" onsubmit="return confirm('Delete this todo?')"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?=$selected['id']?>"><input type="hidden" name="scope" value="<?=e($scope)?>"><button class="btn delete-btn">Delete Todo</button></form></div>
-<?php else: ?><h2>No Todo Selected</h2><?php endif; ?>
-</aside>
-<section class="new-todo-section"><form class="todo-form" method="post" action="actions.php" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="<?=e(csrf_token())?>"><input type="hidden" name="action" value="create"><input type="hidden" name="scope" value="<?=e($scope)?>"><span class="eyebrow">NEW TASK</span><h2>Create a New To Do</h2>
-<div class="form-group"><label for="title">To Do Title</label><input id="title" name="title" maxlength="150" required placeholder="Enter your task..."></div>
-<div class="form-group"><label for="description">Description</label><textarea id="description" name="description" rows="3" placeholder="Describe your task..."></textarea></div>
-<div class="form-row"><div class="form-group"><label for="priority">Priority</label><select id="priority" name="priority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div><div class="form-group"><label for="due_date">Due Date</label><input id="due_date" type="date" name="due_date"></div></div>
-<div class="form-row"><div class="form-group"><label for="category">Category</label><select id="category" name="category"><option>Kuliah</option><option>Personal</option><option>Organization</option></select></div><div class="form-group"><label for="notification_time">Reminder Time (optional)</label><input id="notification_time" type="datetime-local" name="notification_time"></div></div>
-<div class="form-group"><label for="attachment">Image attachment (optional)</label><input id="attachment" type="file" name="attachment" accept="image/png,image/jpeg,image/webp"><small>Maximum 2 MB. PNG, JPG, or WEBP.</small></div><button class="add-btn" type="submit">+ Add Todo</button></form></section>
-</main><footer class="footer">© 2026 My To Do List · The Iron Citadel</footer><script src="script.js"></script></body></html>
+
+    <?php require 'menubar.php'; ?>
+
+    <section class="container">
+
+        <!-- TODO LIST -->
+        <section class="todo-panel" aria-labelledby="todo-list-title">
+
+            <div class="panel-header">
+                <div>
+                    <span class="eyebrow" id="workspace-label">
+                        <?= $scope === 'shared' ? 'TEAM WORKSPACE' : 'YOUR WORKSPACE' ?>
+                    </span>
+
+                    <h2 id="todo-list-title">
+                        <?= ucfirst($scope) ?> Todos
+                    </h2>
+
+                    <p id="task-info" aria-live="polite">
+                        Loading tasks...
+                    </p>
+                </div>
+
+                <span
+                    id="todo-count"
+                    class="todo-count"
+                    aria-label="Number of remaining tasks"
+                >0</span>
+            </div>
+
+            <div id="todo-list" class="todo-list" aria-live="polite">
+                Loading todos...
+            </div>
+
+        </section>
+
+        <!-- TODO DETAILS -->
+        <aside class="detail-panel" aria-labelledby="detail-title">
+
+            <div class="detail-header">
+                <span class="label">TO DO DETAILS</span>
+
+                <h2 id="detail-title">Select a Todo</h2>
+
+                <p id="detail-date">Deadline: -</p>
+            </div>
+
+            <div class="detail-info">
+
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <strong id="detail-status">-</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Priority</span>
+                    <strong id="detail-priority">-</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Due Date</span>
+                    <strong id="detail-due">-</strong>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Category</span>
+                    <strong id="detail-category">-</strong>
+                </div>
+
+            </div>
+
+            <div class="description">
+                <h3>Description</h3>
+                <p id="detail-description">-</p>
+            </div>
+
+            <div
+                id="detail-image-container"
+                class="detail-image-container"
+                hidden
+            >
+                <span class="info-label">Captured Image</span>
+
+                <img
+                    id="detail-image"
+                    class="detail-image"
+                    src=""
+                    alt="Captured image for this todo"
+                >
+            </div>
+
+            <div
+                id="detail-notification-container"
+                class="notification-detail"
+                hidden
+            >
+                <span class="info-label">Notification</span>
+                <strong id="detail-notification">-</strong>
+            </div>
+
+            <div class="actions">
+
+                <button
+                    id="edit-btn"
+                    class="btn edit-btn"
+                    type="button"
+                >
+                    Edit Todo
+                </button>
+
+                <button
+                    id="complete-btn"
+                    class="btn complete-btn"
+                    type="button"
+                >
+                    Mark as Complete
+                </button>
+
+                <button
+                    id="delete-btn"
+                    class="btn delete-btn"
+                    type="button"
+                >
+                    Delete Todo
+                </button>
+
+            </div>
+
+        </aside>
+
+    </section>
+
+    <!-- CREATE TODO -->
+    <section
+        class="new-todo-section"
+        aria-labelledby="new-task-title"
+    >
+
+        <form
+            id="todo-form"
+            class="todo-form"
+            method="post"
+            action="actions.php"
+            enctype="multipart/form-data"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= e(csrf_token()) ?>"
+            >
+
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="scope" value="<?= e($scope) ?>">
+
+            <div class="form-heading">
+                <span class="label">NEW TASK</span>
+
+                <h2 id="new-task-title">
+                    Create a New To Do
+                </h2>
+            </div>
+
+            <div class="form-group">
+                <label for="title">To Do Title</label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    maxlength="150"
+                    placeholder="Enter your task..."
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    placeholder="Describe your task..."
+                ></textarea>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+
+                    <select id="priority" name="priority">
+                        <option value="high">High</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Due Date</label>
+
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                    >
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+
+                <select id="category" name="category">
+                    <option value="Kuliah">Kuliah</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Organization">Organization</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="notification-time">
+                    Notification Time
+                </label>
+
+                <input
+                    type="datetime-local"
+                    id="notification-time"
+                    name="notification-time"
+                >
+
+                <small class="form-help">
+                    Set when you want to receive a notification.
+                </small>
+            </div>
+
+            <!-- CAMERA -->
+            <fieldset class="camera-section">
+
+                <legend>Todo Image</legend>
+
+                <p class="camera-description">
+                    You can capture an image using your camera.
+                </p>
+
+                <div class="camera-preview-wrapper">
+
+                    <video
+                        id="camera-preview"
+                        class="camera-preview"
+                        autoplay
+                        playsinline
+                        muted
+                        aria-label="Camera preview"
+                    ></video>
+
+                    <canvas id="camera-canvas" hidden></canvas>
+
+                </div>
+
+                <div class="camera-buttons">
+
+                    <button
+                        type="button"
+                        id="start-camera-btn"
+                        class="camera-btn"
+                    >
+                        📷 Start Camera
+                    </button>
+
+                    <button
+                        type="button"
+                        id="capture-btn"
+                        class="camera-btn"
+                        disabled
+                    >
+                        📸 Capture Image
+                    </button>
+
+                    <button
+                        type="button"
+                        id="stop-camera-btn"
+                        class="camera-btn"
+                        disabled
+                    >
+                        Stop Camera
+                    </button>
+
+                </div>
+
+                <div
+                    id="captured-image-wrapper"
+                    class="captured-image-wrapper"
+                    hidden
+                >
+
+                    <p>Captured Image:</p>
+
+                    <img
+                        id="captured-image"
+                        class="captured-image"
+                        src=""
+                        alt="Preview of captured todo image"
+                    >
+
+                    <button
+                        type="button"
+                        id="remove-image-btn"
+                        class="remove-image-btn"
+                    >
+                        Remove Image
+                    </button>
+
+                </div>
+
+            </fieldset>
+
+            <button type="submit" class="add-btn">
+                + Add Todo
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>&copy; 2026 My To Do List · The Iron Citadel</p>
+</footer>
+
+<script>
+    window.API_URL = 'api/todos.php';
+    window.TODO_SCOPE = <?= json_encode($scope) ?>;
+    window.SELECTED_ID = <?= json_encode($selectedId) ?>;
+    window.CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

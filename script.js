@@ -289,62 +289,57 @@ function loadTodosFromDatabase() {
 }
 
 
+
 async function initializeDatabase() {
-
     try {
+        const response = await fetch(
+            `${window.API_URL}?scope=${window.TODO_SCOPE}`
+        );
 
-        await openDatabase();
+        const result = await response.json();
 
-
-        const storedTodos =
-            await loadTodosFromDatabase();
-
-
-        if (storedTodos.length === 0) {
-
-            todos =
-                JSON.parse(
-                    JSON.stringify(defaultTodos)
-                );
-
-            await saveTodosToDatabase();
-
-        } else {
-
-            todos = storedTodos;
-
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || "Gagal mengambil data Todo."
+            );
         }
 
+        // Menyesuaikan format data API dengan struktur E03
+        todos = result.data.map(function(todo) {
+            return {
+                id: Number(todo.id),
+                title: todo.title,
+                description: todo.description || "",
+                priority: todo.priority,
+                date: todo.due_date || "",
+                category: todo.category || "Kuliah",
+                completed: Boolean(Number(todo.completed)),
+                image: todo.image_path || null,
+                notificationTime: todo.notification_time || null
+            };
+        });
 
-        if (todos.length > 0) {
-
+        if (window.SELECTED_ID) {
+            selectedTodoId = Number(window.SELECTED_ID);
+        } else if (todos.length > 0) {
             selectedTodoId = todos[0].id;
-
         } else {
-
             selectedTodoId = null;
-
         }
-
 
         renderTodos();
 
-        scheduleAllNotifications();
+        if (typeof scheduleAllNotifications === "function") {
+            scheduleAllNotifications();
+        }
 
     } catch (error) {
+        console.error("REST API error:", error);
 
-        console.error(
-            "IndexedDB error:",
-            error
-        );
-
-        alert(
-            "Tidak dapat membuka database."
-        );
-
+        alert("Tidak dapat mengambil data Todo dari server.");
     }
-
 }
+
 
 function formatDate(date) {
 
@@ -773,269 +768,289 @@ function showDetail(todo) {
 
 }
 
+
 async function toggleTodo(id) {
-
-    const todo =
-        todos.find(function(todo) {
-
-            return todo.id === id;
-
-        });
-
+    const todo = todos.find(function(todo) {
+        return todo.id === id;
+    });
 
     if (!todo) {
-
         return;
-
     }
 
+    const statusLama = todo.completed;
+    const statusBaru = !statusLama;
 
-    todo.completed =
-        !todo.completed;
+    try {
+        const response = await fetch(
+            window.API_URL +
+            "?id=" + id +
+            "&scope=" + window.TODO_SCOPE,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": window.CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    completed: statusBaru
+                })
+            }
+        );
 
+        const result = await response.json();
 
-    selectedTodoId =
-        id;
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || "Gagal memperbarui status Todo."
+            );
+        }
 
+        todo.completed = Boolean(Number(result.data.completed));
+        selectedTodoId = id;
 
-    await saveTodosToDatabase();
+        renderTodos();
 
-    renderTodos();
-
+    } catch (error) {
+        console.error("PATCH REST API error:", error);
+        alert(error.message);
+    }
 }
+
+
 
 
 todoForm.addEventListener(
     "submit",
     async function(event) {
-
         event.preventDefault();
 
-
-        const title =
-            titleInput.value.trim();
-
-
-        const description =
-            descriptionInput.value.trim();
-
-
-        const priority =
-            priorityInput.value;
-
-
-        const date =
-            dateInput.value;
-
-
-        const category =
-            categoryInput.value;
-
-
-        const notificationTime =
-            notificationTimeInput.value;
-
+        const title = titleInput.value.trim();
+        const description = descriptionInput.value.trim();
+        const priority = priorityInput.value;
+        const date = dateInput.value;
+        const category = categoryInput.value;
+        const notificationTime = notificationTimeInput.value;
 
         if (title === "") {
-
-            alert(
-                "Please enter a todo title."
-            );
-
+            alert("Please enter a todo title.");
             titleInput.focus();
-
             return;
-
         }
-
 
         const newTodo = {
-
-            id: Date.now(),
-
             title: title,
-
             description: description,
-
             priority: priority,
-
-            date: date,
-
+            due_date: date || null,
             category: category,
-
-            completed: false,
-
-            image: capturedImage,
-
-            notificationTime:
-                notificationTime || null
-
+            notification_time: notificationTime || null
         };
 
-
-        todos.push(newTodo);
-
-
-        selectedTodoId =
-            newTodo.id;
-
-
-        await saveTodosToDatabase();
-
-
-        todoForm.reset();
-
-
-        removeCapturedImage();
-
-
-        renderTodos();
-
-
-        if (notificationTime) {
-
-            requestNotificationPermission();
-
-            scheduleNotification(
-                newTodo
+        try {
+            const response = await fetch(
+                window.API_URL + "?scope=" + window.TODO_SCOPE,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": window.CSRF_TOKEN
+                    },
+                    body: JSON.stringify(newTodo)
+                }
             );
 
-        }
+            const result = await response.json();
 
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Gagal menambahkan Todo."
+                );
+            }
+
+            const data = result.data;
+
+            const todo = {
+                id: Number(data.id),
+                title: data.title,
+                description: data.description || "",
+                priority: data.priority,
+                date: data.due_date || "",
+                category: data.category || "Kuliah",
+                completed: Boolean(Number(data.completed)),
+                image: data.image_path || null,
+                notificationTime: data.notification_time || null
+            };
+
+            todos.push(todo);
+            selectedTodoId = todo.id;
+
+            todoForm.reset();
+            removeCapturedImage();
+
+            renderTodos();
+
+            if (todo.notificationTime) {
+                requestNotificationPermission();
+                scheduleNotification(todo);
+            }
+
+            alert("Todo berhasil ditambahkan!");
+
+        } catch (error) {
+            console.error("POST REST API error:", error);
+            alert(error.message);
+        }
     }
 );
 
+
+
 async function editTodo() {
-
-    const todo =
-        todos.find(function(todo) {
-
-            return todo.id === selectedTodoId;
-
-        });
-
+    const todo = todos.find(function(todo) {
+        return todo.id === selectedTodoId;
+    });
 
     if (!todo) {
-
-        alert(
-            "Please select a todo first."
-        );
-
+        alert("Please select a todo first.");
         return;
-
     }
 
-
-    const newTitle =
-        prompt(
-            "Edit todo title:",
-            todo.title
-        );
-
+    const newTitle = prompt("Edit todo title:", todo.title);
 
     if (newTitle === null) {
-
         return;
-
     }
-
 
     if (newTitle.trim() === "") {
-
-        alert(
-            "Todo title cannot be empty."
-        );
-
+        alert("Todo title cannot be empty.");
         return;
-
     }
 
+    const newDescription = prompt(
+        "Edit description:",
+        todo.description
+    );
 
-    const newDescription =
-        prompt(
-            "Edit description:",
-            todo.description
+    if (newDescription === null) {
+        return;
+    }
+
+    const updatedTodo = {
+        title: newTitle.trim(),
+        description: newDescription.trim(),
+        priority: todo.priority,
+        due_date: todo.date || null,
+        category: todo.category,
+        completed: todo.completed,
+        notification_time: todo.notificationTime || null
+    };
+
+    try {
+        const response = await fetch(
+            window.API_URL +
+            "?id=" + todo.id +
+            "&scope=" + window.TODO_SCOPE,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": window.CSRF_TOKEN
+                },
+                body: JSON.stringify(updatedTodo)
+            }
         );
 
+        const result = await response.json();
 
-    todo.title =
-        newTitle.trim();
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || "Gagal mengedit Todo."
+            );
+        }
 
+        const data = result.data;
 
-    if (newDescription !== null) {
+        Object.assign(todo, {
+            title: data.title,
+            description: data.description || "",
+            priority: data.priority,
+            date: data.due_date || "",
+            category: data.category || "Kuliah",
+            completed: Boolean(Number(data.completed)),
+            image: data.image_path || null,
+            notificationTime: data.notification_time || null
+        });
 
-        todo.description =
-            newDescription.trim();
+        renderTodos();
 
+        alert("Todo berhasil diperbarui!");
+
+    } catch (error) {
+        console.error("PUT REST API error:", error);
+        alert(error.message);
     }
-
-
-    await saveTodosToDatabase();
-
-    renderTodos();
-
 }
+
+
 
 async function deleteTodo() {
-
-    const todo =
-        todos.find(function(todo) {
-
-            return todo.id === selectedTodoId;
-
-        });
-
+    const todo = todos.find(function(todo) {
+        return todo.id === selectedTodoId;
+    });
 
     if (!todo) {
-
-        alert(
-            "Please select a todo first."
-        );
-
+        alert("Please select a todo first.");
         return;
-
     }
 
-
-    const confirmation =
-        confirm(
-            `Delete "${todo.title}"?`
-        );
-
+    const confirmation = confirm(
+        `Delete "${todo.title}"?`
+    );
 
     if (!confirmation) {
-
         return;
-
     }
 
+    try {
+        const response = await fetch(
+            window.API_URL +
+            "?id=" + todo.id +
+            "&scope=" + window.TODO_SCOPE,
+            {
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-Token": window.CSRF_TOKEN
+                }
+            }
+        );
 
-    todos =
-        todos.filter(function(todo) {
+        const result = await response.json();
 
-            return todo.id !== selectedTodoId;
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || "Gagal menghapus Todo."
+            );
+        }
 
+        todos = todos.filter(function(item) {
+            return item.id !== todo.id;
         });
 
+        selectedTodoId = todos.length > 0
+            ? todos[0].id
+            : null;
 
-    if (todos.length > 0) {
+        renderTodos();
 
-        selectedTodoId =
-            todos[0].id;
+        alert("Todo berhasil dihapus!");
 
-    } else {
-
-        selectedTodoId =
-            null;
-
+    } catch (error) {
+        console.error("DELETE REST API error:", error);
+        alert(error.message);
     }
-
-
-    await saveTodosToDatabase();
-
-    renderTodos();
-
 }
+
 
 completeBtn.addEventListener(
     "click",

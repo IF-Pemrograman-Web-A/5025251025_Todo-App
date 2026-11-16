@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "todo-app-cache-v2";
+const CACHE_NAME = "todo-app-cache-v3";
 
 const FILES_TO_CACHE = [
     "./offline.html",
@@ -45,8 +45,14 @@ self.addEventListener("activate", function(event) {
 
 self.addEventListener("fetch", function(event) {
     const request = event.request;
+    const url = new URL(request.url);
 
     if (request.method !== "GET") {
+        return;
+    }
+
+    // REST API harus selalu mengambil data langsung dari server.
+    if (url.pathname.includes("/api/")) {
         return;
     }
 
@@ -68,17 +74,28 @@ self.addEventListener("fetch", function(event) {
         return;
     }
 
-    event.respondWith(
-        caches.match(request)
-            .then(function(cachedResponse) {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
+    
+event.respondWith(
+    caches.match(request)
+        .then(function(cachedResponse) {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
 
-                return fetch(request);
-            })
-    );
-});
+            return fetch(request).catch(function(error) {
+                console.error("Fetch gagal:", request.url, error);
+
+                return new Response(
+                    "Resource tidak tersedia.",
+                    {
+                        status: 503,
+                        statusText: "Service Unavailable"
+                    }
+                );
+            });
+        })
+);
+
 
 self.addEventListener("message", function(event) {
     if (
